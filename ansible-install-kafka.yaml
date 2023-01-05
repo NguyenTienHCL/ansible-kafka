@@ -1,0 +1,213 @@
+---
+
+- hosts: all
+
+  remote_user: root
+
+  tasks:
+
+  - name: update
+
+    apt:
+
+      update_cache: yes
+
+  - name: install java
+
+    apt:
+
+      name: default-jre
+
+  - name: create a kafka folder
+
+    file:
+
+      path: /opt/kafka
+
+      state: directory
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: download kafka
+
+    unarchive:
+
+      src: https://downloads.apache.org/kafka/3.3.1/kafka_2.13-3.3.1.tgz
+
+      dest: /opt/kafka
+
+      remote_src: yes
+
+
+
+- hosts: zookeeper
+
+  remote_user: root
+
+  tasks:
+
+  - name: service
+
+    copy:
+
+      src: ./zookeeper.service
+
+      dest:  /etc/systemd/system
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: reload
+
+    command: systemctl daemon-reload
+
+  - name: start service
+
+    become_user: root
+
+    command: sudo systemctl start zookeeper.service
+
+
+
+
+- hosts: node1
+
+  remote_user: root
+
+  tasks:
+
+  - name: copy file properties
+
+    copy:
+
+      src: ./server1.properties
+
+      dest:  /opt/kafka/kafka_2.13-3.3.1/config
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: service
+
+    copy:
+
+      src: ./kafka1.service
+
+      dest:  /etc/systemd/system
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: reload
+
+    command: systemctl daemon-reload
+
+  - name: start service
+
+    command: sudo systemctl restart kafka1.service
+
+
+
+
+
+- hosts: node2
+
+  remote_user: root
+
+  tasks:
+
+  - name: copy file properties
+
+    copy:
+
+      src: ./server2.properties
+
+      dest: /opt/kafka/kafka_2.13-3.3.1/config
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: service
+
+    copy:
+
+      src: ./kafka2.service
+
+      dest:  /etc/systemd/system
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: reload
+
+    command: systemctl daemon-reload
+
+  - name: start service
+
+    command: sudo systemctl restart kafka2.service
+
+
+
+
+
+
+- hosts: node3
+
+  remote_user: root
+
+  tasks:
+
+  - name: copy file properties
+
+    copy:
+
+      src: ./server3.properties
+
+      dest: /opt/kafka/kafka_2.13-3.3.1/config
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: service
+
+    copy:
+
+      src: ./kafka3.service
+
+      dest:  /etc/systemd/system
+
+      owner: root
+
+      group: root
+
+      mode: 755
+
+  - name: reload
+
+    command: systemctl daemon-reload
+
+  - name: start service
+
+    command: sudo systemctl restart kafka3.service
